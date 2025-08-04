@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" oncopy="return false" oncut="return false" onpaste="return false">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ test.title }} - Aptitude Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .question-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+        .question-card:first-child {
+            display: block;
+        }
+        .question-number {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .option-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-item:hover {
+            background-color: #f8f9fa;
+        }
+        .option-item.selected {
+            background-color: #e3f2fd;
+            border-color: #90caf9;
+        }
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .timer-warning {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .navigation-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-submit {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">
+        Time Remaining: <span id="time-display">{{ test.time_limit }}:00</span>
+    </div>
+
+    <div class="test-container">
+        <div class="test-header">
+            <h1>{{ test.title }}</h1>
+            <p class="lead">Welcome, {{ candidate.name }}</p>
+            <div class="alert alert-info">
+                <p><strong>Instructions:</strong></p>
+                <ul>
+                    <li>You have {{ test.time_limit }} minutes to complete this test</li>
+                    <li>Each question has only one correct answer</li>
+                    <li>You cannot go back to previous questions once submitted</li>
+                    <li>The test will automatically submit when the time is up</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="test-form">
+            {% for question in questions %}
+            <div class="question-card" id="question-{{ loop.index }}">
+                <div class="question-number">Question {{ loop.index }} of {{ questions|length }}</div>
+                <div class="question-text">{{ question.text }}</div>
+                
+                <div class="options-list" data-question-index="{{ question.id }}">
+                    {% for option in question.options %}
+                    <div class="option-item" data-option-id="{{ option.id }}">
+                        {{ option.option_text }}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="navigation-buttons">
+                    {% if not loop.first %}
+                    <button class="btn btn-outline-secondary" onclick="showQuestion({{ loop.index - 1 }})">Previous</button>
+                    {% endif %}
+                    
+                    {% if not loop.last %}
+                    <button class="btn btn-outline-primary" onclick="showQuestion({{ loop.index + 1 }})">Next</button>
+                    {% else %}
+                    <button class="btn btn-outline-success" onclick="showSubmitConfirmation()">Finish</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            
+                            <div id="submit-confirmation" class="text-center mt-4 d-none">
+                <div class="alert alert-warning">
+                    <h4>Are you sure you want to submit your test?</h4>
+                    <p>Please review your answers before submitting.</p>
+                    <button class="btn btn-secondary mr-2" onclick="hideSubmitConfirmation()">Review Answers</button>
+                    <button class="btn btn-success" onclick="submitTest()">Submit Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Disable keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Disable Ctrl+C, Ctrl+V, Ctrl+X
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+                e.preventDefault();
+            }
+            // Disable F12 key
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+            // Disable Alt+PrtScn
+            if (e.altKey && e.key === 'PrintScreen') {
+                e.preventDefault();
+            }
+        });
+
+        // Timer functionality
+        let timeLeft = {{ test.time_limit * 60 }};
+        const timerDisplay = document.getElementById('time-display');
+
+        function startTimer() {
+            const timer = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitTest();
+                    return;
+                }
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft < 300) {
+                    document.getElementById('timer').classList.add('timer-warning');
+                }
+            }, 1000);
+        }
+
+        // Question navigation
+        let currentQuestion = 1;
+        const answers = {};
+
+        function showQuestion(index) {
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.style.display = 'none';
+            });
+            document.getElementById(`question-${index}`).style.display = 'block';
+            currentQuestion = index;
+        }
+
+        // Option selection
+        document.querySelectorAll('.option-item').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionIndex = this.parentElement.dataset.questionIndex;
+                const optionId = this.dataset.optionId;
+                
+                // Remove selection from other options in the same question
+                this.parentElement.querySelectorAll('.option-item').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selection to clicked option
+                this.classList.add('selected');
+                
+                // Save answer
+                answers[questionIndex] = optionId;
+            });
+        });
+
+        function showSubmitConfirmation() {
+            document.getElementById('submit-confirmation').style.display = 'block';
+        }
+
+        function hideSubmitConfirmation() {
+            document.getElementById('submit-confirmation').style.display = 'none';
+        }
+
+        async function submitTest() {
+            try {
+                const response = await fetch(`/aptitude/submit_test/{{ attempt_id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ answers: answers })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = result.redirect;
+                } else {
+                    alert('Error submitting test. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting test. Please try again.');
+            }
+        }
+
+        // Start timer when page loads
+        document.addEventListener('DOMContentLoaded', startTimer);
+    </script>
+</body>
+</html>

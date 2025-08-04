@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Resume Processing{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="mt-4"></div>
+
+<section class="hero bg-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Smart Resume Processing</h1>
+                <p class="lead text-secondary mb-4">Transform your hiring process with AI-powered resume matching and optimization. Find the perfect candidates faster and smarter.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('screeningbp.screening_home') }}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Start Screening
+                    </a>
+                    <a href="{{ url_for('features') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="{{ url_for('static', filename='images/hero-illustration.svg') }}" alt="Resume Processing Illustration" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features py-5">
+    <div class="container">
+        <h2 class="section-title">Our Core Features</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Resume Screening</h3>
+                        <p class="text-secondary mb-4">Intelligently match JD with resumes to find the most qualified candidates efficiently.</p>
+                        <a href="{{ url_for('screeningbp.screening_home') }}" class="btn btn-primary">
+                            Start Screening
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Resume Optimization</h3>
+                        <p class="text-secondary mb-4">Enhance resumes to better align with job requirements and increase chances of selection.</p>
+                        <a href="{{ url_for('optimizingbp.optimizing_home') }}" class="btn btn-primary">
+                            Start Optimizing
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Aptitude Testing</h3>
+                        <p class="text-secondary mb-4">Evaluate candidates' skills and abilities with our comprehensive aptitude testing platform.</p>
+                        <a href="{{ url_for('aptitude.aptitude_home') }}" class="btn btn-primary">
+                            Start Testing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="mb-4">Ready to Transform Your Hiring Process?</h2>
+                <p class="lead text-secondary mb-4">Join thousands of companies that trust our platform for their recruitment needs.</p>
+                <a href="{{ url_for('contact') }}" class="btn btn-lg btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>Get Started
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

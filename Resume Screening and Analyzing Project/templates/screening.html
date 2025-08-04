@@ -1,0 +1,502 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Screening - Resume Processing{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="header-section">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold mb-3">Job Description and Resume Matcher</h1>
+            <p class="lead text-secondary">Match the perfect candidates with our intelligent resume screening system</p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="content-section mt-n3">
+    <div class="container">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('screeningbp.matcher') }}" enctype="multipart/form-data" class="screening-form">
+                    <!-- Job Description -->
+                    <div class="mb-4">
+                        <label for="job_description" class="form-label h5">Job Description</label>
+                        <textarea 
+                            class="form-control" 
+                            id="job_description" 
+                            name="job_description" 
+                            rows="8"
+                            placeholder="Paste the job description here..."
+                            required></textarea>
+                    </div>
+
+                    <!-- Resume Upload -->
+                    <div class="mb-4">
+                        <label for="resumes" class="form-label h5">Upload Resumes</label>
+                        <p class="text-secondary mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Please upload more than 5 resumes for better results
+                        </p>
+                        <div class="upload-area p-4 bg-light rounded text-center">
+                            <input type="file" class="form-control d-none" id="resumes" name="resumes" multiple required accept=".pdf, .docx, .txt">
+                            <label for="resumes" class="upload-label mb-0">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                <p class="mb-1">Drag and drop files here or click to browse</p>
+                                <p class="small text-secondary">Supported formats: PDF, DOCX, TXT</p>
+                            </label>
+                        </div>
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3"></div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg" id="match-resumes" onclick="showLoading()">
+                            <i class="fas fa-search me-2"></i>Match Resumes
+                        </button>
+                        <div id="loading" class="mt-3 d-none">
+                            <div class="spinner-border text-primary me-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span class="text-primary">Processing your request...</span>
+                        </div>
+                    </div>
+                </form>
+
+                {% if message %}
+                <!-- Results Section -->
+                <div class="results-section mt-5">
+                    <div class="alert alert-success mb-4">
+                        <i class="fas fa-check-circle me-2"></i>{{ message }}
+                    </div>
+
+                    <!-- Resume Cards -->
+                    <div class="row g-4">
+                        {% for index in range(resumes|length) %}
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm resume-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">
+                                            <a href="{{ url_for('screeningbp.uploaded_file', filename=resumes[index]) }}" 
+                                               target="_blank" 
+                                               class="text-decoration-none">
+                                                <i class="fas fa-file-pdf me-2"></i>{{ resumes[index] }}
+                                            </a>
+                                        </h5>
+                                        <span class="badge bg-primary">Score: {{ scores[index] }}</span>
+                                    </div>
+                                    
+                                    {% if people[index] %}
+                                    <hr>
+                                    <div class="candidate-info">
+                                        <div class="mb-2">
+                                            <i class="fas fa-user me-2 text-primary"></i>
+                                            <strong>Name:</strong> {{ people[index].get('name', 'N/A') }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="fas fa-envelope me-2 text-primary"></i>
+                                            <strong>Email:</strong> {{ people[index].get('email', 'N/A') }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="fas fa-phone me-2 text-primary"></i>
+                                            <strong>Phone:</strong> {{ people[index].get('mobile_number', 'N/A') }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="fas fa-code me-2 text-primary"></i>
+                                            <strong>Skills:</strong>
+                                            <div class="skills-container mt-2">
+                                                {% for skill in people[index].get('skills', []) %}
+                                                <span class="badge bg-light text-primary me-2 mb-2">{{ skill }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="mb-0">
+                                            <i class="fas fa-briefcase me-2 text-primary"></i>
+                                            <strong>Experience:</strong> {{ people[index].get('total_experience', 'N/A') }} years
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                    class="form-check-input candidate-checkbox"
+                                                    data-id="{{ index }}"
+                                                    id="candidate-{{ index }}">
+                                                <label class="form-check-label"
+                                                    for="candidate-{{ index }}">Select for shortlist</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Aptitude Test Section -->
+                    <div class="mt-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h2 class="h4 mb-4">Send Aptitude Test to Selected Candidates</h2>
+                                <form method="POST" action="{{ url_for('screeningbp.send_test_links') }}" id="test-form">
+                                    <div class="mb-4">
+                                        <label for="test_id" class="form-label">Select Test Type:</label>
+                                        <select class="form-control" id="test_id" name="test_id" required>
+                                            <option value="">-- Select a test type --</option>
+                                            <option value="technical">Technical Assessment</option>
+                                            <option value="aptitude">Aptitude Test</option>
+                                            <option value="personality">Personality Assessment</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div id="selected-candidates-container" class="mb-4">
+                                        <!-- Selected candidates will be added here dynamically -->
+                                    </div>
+                                    
+                                    <div class="d-flex gap-3">
+                                        <button type="submit" class="btn btn-primary" id="send-test-links" disabled>
+                                            <i class="fas fa-paper-plane me-2"></i>Send Test Links
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if emails|length > 0 %}
+                    <!-- Email Section -->
+                    <div class="email-section mt-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h2 class="h4 mb-4">Shortlisted Candidates</h2>
+                                <div class="row g-3 mb-4">
+                                    {% for email in emails %}
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2 px-3">
+                                                <i class="fas fa-envelope me-2 text-primary"></i>{{ email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <form method="POST" action="{{ url_for('screeningbp.send_emails') }}" class="text-center">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Information to Candidates
+                                    </button>
+                                    <p class="text-secondary mt-3 mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Further details and information will be sent to the shortlisted candidates.
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+                            <div class="mt-3"></div>
+        
+        <a href="{{ url_for('home') }}" class="btn btn-outline-primary me-3">
+            <i class="fas fa-arrow-left me-2"></i>Back to Home
+        </a>
+    </div>
+</section>
+
+<!-- PDF.js Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+}
+
+// File Upload Preview
+document.getElementById('resumes').addEventListener('change', function(event) {
+    let files = event.target.files;
+    let previewContainer = document.getElementById('previewContainer');
+    previewContainer.innerHTML = '';
+
+    Array.from(files).forEach(file => {
+        if (file.type === 'application/pdf') {
+            let reader = new FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onload = function() {
+                let loadingTask = pdfjsLib.getDocument({data: new Uint8Array(reader.result)});
+                loadingTask.promise.then(pdf => {
+                    pdf.getPage(1).then(page => {
+                        let canvas = document.createElement('canvas');
+                        let context = canvas.getContext('2d');
+                        let viewport = page.getViewport({scale: 0.3});
+
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+
+                        let wrapper = document.createElement("div");
+                        wrapper.className = 'preview-wrapper';
+                        wrapper.innerHTML = `
+                            <div class="preview-card">
+                                <div class="preview-content">
+                                    <canvas></canvas>
+                                    <p class="preview-filename">${file.name}</p>
+                                </div>
+                                <button type="button" class="preview-remove" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `;
+
+                        wrapper.querySelector('canvas').width = viewport.width;
+                        wrapper.querySelector('canvas').height = viewport.height;
+
+                        page.render({
+                            canvasContext: wrapper.querySelector('canvas').getContext('2d'),
+                            viewport: viewport
+                        });
+
+                        previewContainer.appendChild(wrapper);
+
+                        // Open PDF on click
+                        wrapper.querySelector('canvas').addEventListener('click', () => {
+                            let objectURL = URL.createObjectURL(file);
+                            window.open(objectURL, '_blank');
+                        });
+                    });
+                }).catch(err => console.error("Error loading PDF:", err));
+            };
+        } else {
+            // For non-PDF files
+            let wrapper = document.createElement("div");
+            wrapper.className = 'preview-wrapper';
+            wrapper.innerHTML = `
+                <div class="preview-card">
+                    <div class="preview-content">
+                        <i class="fas fa-file fa-3x text-secondary"></i>
+                        <p class="preview-filename">${file.name}</p>
+                    </div>
+                    <button type="button" class="preview-remove" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            previewContainer.appendChild(wrapper);
+        }
+    });
+});
+
+// Drag and drop functionality
+const uploadArea = document.querySelector('.upload-area');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    uploadArea.classList.add('highlight');
+}
+
+function unhighlight(e) {
+    uploadArea.classList.remove('highlight');
+}
+
+uploadArea.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    document.getElementById('resumes').files = files;
+    
+    // Trigger the change event manually
+    const event = new Event('change');
+    document.getElementById('resumes').dispatchEvent(event);
+}
+
+// Handle checkbox selection and aptitude test functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.candidate-checkbox');
+    const sendTestLinksBtn = document.getElementById('send-test-links');
+    const selectedCandidatesContainer = document.getElementById('selected-candidates-container');
+    const testForm = document.getElementById('test-form');
+
+    function updateSelectedCandidates() {
+        const selectedCandidates = [];
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const candidateCard = checkbox.closest('.resume-card');
+                const name = candidateCard.querySelector('.candidate-info strong:first-child').nextSibling.textContent.trim();
+                const email = candidateCard.querySelector('.candidate-info strong:nth-child(3)').nextSibling.textContent.trim();
+                
+                selectedCandidates.push({
+                    id: checkbox.dataset.id,
+                    name: name,
+                    email: email
+                });
+
+                // Add hidden input for the form
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'selected_candidates[]';
+                hiddenInput.value = JSON.stringify({
+                    id: checkbox.dataset.id,
+                    name: name,
+                    email: email
+                });
+                testForm.appendChild(hiddenInput);
+            }
+        });
+
+        // Update selected candidates display
+        selectedCandidatesContainer.innerHTML = selectedCandidates.length > 0 
+            ? `<div class="alert alert-info">
+                <h6 class="mb-2">Selected Candidates (${selectedCandidates.length}):</h6>
+                ${selectedCandidates.map(c => `
+                    <div class="selected-candidate mb-1">
+                        <i class="fas fa-user me-2"></i>${c.name} (${c.email})
+                    </div>
+                `).join('')}
+               </div>`
+            : '';
+
+        // Enable/disable send button
+        sendTestLinksBtn.disabled = selectedCandidates.length === 0;
+    }
+
+    // Add event listeners to checkboxes
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCandidates);
+    });
+
+    // Handle form submission
+    testForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const testId = document.getElementById('test_id').value;
+        if (!testId) {
+            alert('Please select a test type');
+            return;
+        }
+
+        const selectedCount = document.querySelectorAll('.candidate-checkbox:checked').length;
+        if (selectedCount === 0) {
+            alert('Please select at least one candidate');
+            return;
+        }
+
+        // Show loading state
+        sendTestLinksBtn.disabled = true;
+        sendTestLinksBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+
+        // Submit the form
+        this.submit();
+    });
+});
+</script>
+
+<style>
+.upload-area {
+    border: 2px dashed var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover, .upload-area.highlight {
+    border-color: var(--primary-color);
+    background-color: var(--background-white);
+}
+
+.upload-label {
+    cursor: pointer;
+}
+
+.preview-wrapper {
+    width: 150px;
+}
+
+.preview-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+}
+
+.preview-content {
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.preview-content canvas {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+}
+
+.preview-filename {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-remove {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0;
+    font-size: 0.75rem;
+}
+
+.preview-remove:hover {
+    color: var(--error-color);
+}
+
+.resume-card {
+    transition: transform 0.2s ease;
+}
+
+.resume-card:hover {
+    transform: translateY(-2px);
+}
+
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.selected-candidate {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.alert-info {
+    background-color: var(--light-blue);
+    border-color: var(--primary-color);
+}
+</style>
+{% endblock %}

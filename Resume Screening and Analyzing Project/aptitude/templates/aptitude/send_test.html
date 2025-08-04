@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Send Test to Candidates{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Send Test: {{ test.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="test-details mb-4">
+                        <h4>Test Details</h4>
+                        <p><strong>Description:</strong> {{ test.description }}</p>
+                        <p><strong>Time Limit:</strong> {{ test.time_limit_minutes }} minutes</p>
+                        <p><strong>Passing Score:</strong> {{ test.passing_score }}%</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('aptitude.send_test', test_id=test.id) }}">
+                        <div class="form-group">
+                            <label for="candidate_emails">Candidate Emails:</label>
+                            <textarea class="form-control" id="candidate_emails" name="candidate_emails" rows="5" placeholder="Enter email addresses separated by commas" required></textarea>
+                            <small class="form-text text-muted">Enter multiple email addresses separated by commas (e.g., candidate1@example.com, candidate2@example.com)</small>
+                        </div>
+                        
+                        <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Send Test Links</button>
+                            <a href="{{ url_for('aptitude.edit_test', test_id=test.id) }}" class="btn btn-secondary ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{{ url_for('aptitude.aptitude_home') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Tests
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Contact - Resume Processing{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="contact-header bg-light py-3 text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Meet Our Team</h1>
+        <p class="lead mb-0">Passionate individuals dedicated to building intelligent solutions.</p>
+    </div>
+</section>
+
+
+
+<!-- Team Section -->
+<section class="team py-3">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card team-card h-100">
+                    <div class="card-body text-center">
+                        <div class="team-avatar mb-3">
+                            <img src="{{ url_for('static', filename='images/laxman.jpeg') }}" alt="Laxman Sawant" class="rounded-circle">
+                        </div>
+                        <h3 class="h4 mb-2">Laxman Sawant</h3>
+                        <p class="text-primary fw-medium mb-2">Lead Developer</p>
+                        <p class="text-secondary mb-3">
+                            <i class="fas fa-envelope me-2"></i>laxman19.sawant@gmail.com
+                        </p>
+                        <div class="social-links">
+                            <a href="https://www.linkedin.com/in/laxman-sawant-010356245/" target="_blank" class="btn btn-outline-primary btn-sm me-2">
+                                <i class="fab fa-linkedin me-1"></i>LinkedIn
+                            </a>
+                            <a href="https://github.com/" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fab fa-github me-1"></i>GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card team-card h-100">
+                    <div class="card-body text-center">
+                        <div class="team-avatar mb-3">
+                            <img src="{{ url_for('static', filename='images/niharika.jpeg') }}" alt="Niharika Sahu" class="rounded-circle">
+                        </div>
+                        <h3 class="h4 mb-2">Niharika Sahu</h3>
+                        <p class="text-primary fw-medium mb-2">Data Scientist</p>
+                        <p class="text-secondary mb-3">
+                            <i class="fas fa-envelope me-2"></i>niharika@gmail.com
+                        </p>
+                        <div class="social-links">
+                            <a href="https://www.linkedin.com/in/niharika-sahu-677511261?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" class="btn btn-outline-primary btn-sm me-2">
+                                <i class="fab fa-linkedin me-1"></i>LinkedIn
+                            </a>
+                            <a href="https://github.com/" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fab fa-github me-1"></i>GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card team-card h-100">
+                    <div class="card-body text-center">
+                        <div class="team-avatar mb-3">
+                            <img src="{{ url_for('static', filename='images/harish.png') }}" alt="Harish Sargar" class="rounded-circle">
+                        </div>
+                        <h3 class="h4 mb-2">Harish Sargar</h3>
+                        <p class="text-primary fw-medium mb-2">Backend Engineer</p>
+                        <p class="text-secondary mb-3">
+                            <i class="fas fa-envelope me-2"></i>harish@gmail.com
+                        </p>
+                        <div class="social-links">
+                            <a href="https://www.linkedin.com/in/harish-sargar-09500124b/" target="_blank" class="btn btn-outline-primary btn-sm me-2">
+                                <i class="fab fa-linkedin me-1"></i>LinkedIn
+                            </a>
+                            <a href="https://github.com/Harishsargar" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fab fa-github me-1"></i>GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form Section -->
+<section class="contact-form bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="h3 text-center mb-4">Get in Touch</h2>
+                        <p class="text-center text-secondary mb-4">Have questions or feedback? We'd love to hear from you.</p>
+                        
+                        {% if message %}
+                        <div class="alert alert-success mb-4" role="alert">
+                            <h5 class="alert-heading mb-2">Thank you, {{ name }}!</h5>
+                            <p class="mb-0">{{ message }} We appreciate your valuable feedback and will consider your suggestions.</p>
+                        </div>
+                        {% endif %}
+                        
+                        <form action="{{ url_for('contact') }}" method="POST">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Your Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="feedback" class="form-label">Your Message</label>
+                                <textarea class="form-control" id="feedback" name="feedback" rows="5" required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

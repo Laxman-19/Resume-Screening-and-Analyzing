@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results - {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Test Results: {{ test.title }}</h1>
+            <p class="text-muted">View all candidate results for this test</p>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{{ url_for('aptitude.send_test', test_id=test.id) }}" class="btn btn-success">
+                <i class="fas fa-paper-plane"></i> Send to More Candidates
+            </a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Test Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Title:</strong> {{ test.title }}</p>
+                    <p><strong>Description:</strong> {{ test.description }}</p>
+                    <p><strong>Created By:</strong> {{ test.created_by }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Time Limit:</strong> {{ test.time_limit_minutes }} minutes</p>
+                    <p><strong>Passing Score:</strong> {{ test.passing_score }}%</p>
+                    <p><strong>Created On:</strong> {{ test.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Candidate Results</h3>
+        </div>
+        <div class="card-body">
+            {% if attempts %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Email</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Date Completed</th>
+                            <th>Time Taken</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in attempts %}
+                        <tr>
+                            <td>{{ attempt.candidate.name }}</td>
+                            <td>{{ attempt.candidate.email }}</td>
+                            <td>{{ "%.1f"|format(attempt.score if attempt.score is not none else 0) }}%</td>
+                            <td>
+                                {% if attempt.passed %}
+                                <span class="badge badge-success">Passed</span>
+                                {% else %}
+                                <span class="badge badge-danger">Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ attempt.end_time.strftime('%Y-%m-%d %H:%M') if attempt.end_time else 'In Progress' }}</td>
+                            <td>
+                                {% if attempt.end_time %}
+                                {% set duration = (attempt.end_time - attempt.start_time).total_seconds() // 60 %}
+                                {{ duration }} minutes
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('aptitude.test_results', attempt_id=attempt.id) }}" class="btn btn-sm btn-info" target="_blank">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Results Summary -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h4>Total Candidates</h4>
+                            <h2>{{ attempts|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>Passed</h4>
+                            <h2>{{ attempts|selectattr('passed', 'equalto', true)|list|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h4>Failed</h4>
+                            <h2>{{ attempts|selectattr('passed', 'equalto', false)|list|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <p>No candidates have taken this test yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('aptitude.aptitude_home') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Tests
+        </a>
+    </div>
+</div>
+{% endblock %} 

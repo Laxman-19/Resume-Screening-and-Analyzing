@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Features - Resume Processing{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero bg-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Powerful Features for Smart Hiring</h1>
+                <p class="lead text-secondary mb-4">Discover how our AI-powered platform revolutionizes the recruitment process with cutting-edge features.</p>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="{{ url_for('static', filename='images/features-hero.svg') }}" alt="Features Illustration" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Features Section -->
+<section class="features py-5">
+    <div class="container">
+        <h2 class="section-title">Core Features</h2>
+        <div class="row g-4">
+            <!-- Resume Screening -->
+            <div class="col-md-6">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Resume Screening</h3>
+                        <p class="text-secondary mb-4">Our advanced AI algorithms analyze and match resumes with job descriptions using:</p>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Natural Language Processing
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Cosine Similarity Matching
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Keyword Analysis
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('screeningbp.screening_home') }}" class="btn btn-primary">
+                            Try Resume Screening
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Optimization -->
+            <div class="col-md-6">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Resume Optimization</h3>
+                        <p class="text-secondary mb-4">Enhance your resume's effectiveness with our optimization tools:</p>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>ATS Compatibility Check
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Keyword Suggestions
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Format Improvement
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('optimizingbp.optimizing_home') }}" class="btn btn-primary">
+                            Optimize Your Resume
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aptitude Testing -->
+            <div class="col-md-6">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Aptitude Testing</h3>
+                        <p class="text-secondary mb-4">Comprehensive candidate assessment through:</p>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Logical Reasoning
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Technical Skills
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Problem Solving
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('aptitude.aptitude_home') }}" class="btn btn-primary">
+                            Start Testing
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="col-md-6">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-4">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Analytics & Insights</h3>
+                        <p class="text-secondary mb-4">Make data-driven decisions with our analytics:</p>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Match Score Analysis
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Candidate Rankings
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>Performance Metrics
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary" disabled>Coming Soon</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits bg-light py-5">
+    <div class="container">
+        <h2 class="section-title">Why Choose Us</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Fast Processing</h3>
+                        <p class="text-secondary mb-0">Process hundreds of resumes in minutes with our efficient AI algorithms.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h3 class="h5 mb-3">High Accuracy</h3>
+                        <p class="text-secondary mb-0">Get precise matches with our advanced NLP and machine learning models.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Secure & Private</h3>
+                        <p class="text-secondary mb-0">Your data is protected with enterprise-grade security measures.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta py-5">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h2 class="mb-4">Ready to Transform Your Hiring Process?</h2>
+                <p class="lead text-secondary mb-4">Start using our powerful features today and find the perfect candidates faster.</p>
+                <a href="{{ url_for('screeningbp.screening_home') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket me-2"></i>Get Started Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

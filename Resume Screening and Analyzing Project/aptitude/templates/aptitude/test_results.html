@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results - {{ test.title }}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .results-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .score-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+        }
+        .pass {
+            background-color: #28a745;
+        }
+        .fail {
+            background-color: #dc3545;
+        }
+        .result-message {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .answer-review {
+            margin-top: 40px;
+        }
+        .question-item {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .incorrect-answer {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .option-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 15px;
+        }
+        .option-item {
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .selected-correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .selected-incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .correct-option {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <div class="results-header">
+            <h1>Test Results</h1>
+            <h3>{{ test.title }}</h3>
+            <p>{{ candidate.name }}</p>
+            <p class="text-muted">Completed on {{ attempt.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+        </div>
+        
+        <div class="score-display">
+            <div class="score-circle {% if attempt.passed %}pass{% else %}fail{% endif %}">
+                {{ "%.1f"|format(attempt.score) }}%
+            </div>
+            <div class="result-message">
+                {% if attempt.passed %}
+                Congratulations! You passed the test.
+                {% else %}
+                Sorry, you did not pass the test.
+                {% endif %}
+            </div>
+            <p class="mt-2">Passing score: {{ test.passing_score }}%</p>
+        </div>
+        
+        <div class="test-summary">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Test Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Time Taken:</strong> 
+                                {% set duration = (attempt.end_time - attempt.start_time).total_seconds() // 60 %}
+                                {{ duration }} minutes
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Questions:</strong> {{ answers|length }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="answer-review mt-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Answer Review</h4>
+                </div>
+                <div class="card-body">
+                    {% for answer in answers %}
+                    <div class="question-item">
+                        <h5>Question {{ loop.index }}</h5>
+                        <p class="question-text">{{ answer.question.text }}</p>
+                        
+                        <div class="answer-status">
+                            {% if answer.is_correct %}
+                            <p class="correct-answer">✓ Correct</p>
+                            {% else %}
+                            <p class="incorrect-answer">✗ Incorrect</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="options">
+                            <p><strong>Options:</strong></p>
+                            <ul class="option-list">
+                                {% for option in answer.question.options %}
+                                <li class="option-item 
+                                    {% if option.id == answer.selected_option_id and answer.is_correct %}selected-correct
+                                    {% elif option.id == answer.selected_option_id and not answer.is_correct %}selected-incorrect
+                                    {% elif option.is_correct %}correct-option{% endif %}">
+                                    {{ option.option_text }}
+                                    {% if option.id == answer.selected_option_id %}
+                                        <span class="badge badge-info float-right">Your answer</span>
+                                    {% endif %}
+                                    {% if option.is_correct and option.id != answer.selected_option_id %}
+                                        <span class="badge badge-success float-right">Correct answer</span>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <p>Thank you for completing the test.</p>
+            <p>Your results have been recorded and will be reviewed by our team.</p>
+        </div>
+    </div>
+</body>
+</html> 

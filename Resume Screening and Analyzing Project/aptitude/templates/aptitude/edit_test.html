@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Aptitude Test{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Edit Test: {{ test.title }}</h1>
+            <p class="text-muted">Created on {{ test.created_at.strftime('%Y-%m-%d') }}</p>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{{ url_for('aptitude.send_test', test_id=test.id) }}" class="btn btn-success">
+                <i class="fas fa-paper-plane"></i> Send Test to Candidates
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Test Details</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Title:</strong> {{ test.title }}</p>
+                    <p><strong>Description:</strong> {{ test.description }}</p>
+                    <p><strong>Time Limit:</strong> {{ test.time_limit_minutes }} minutes</p>
+                    <p><strong>Passing Score:</strong> {{ test.passing_score }}%</p>
+                    <p><strong>Created By:</strong> {{ test.created_by }}</p>
+                    <p><strong>Questions:</strong> {{ questions|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Add New Question</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('aptitude.add_question', test_id=test.id) }}" id="question-form">
+                        <div class="form-group">
+                            <label for="question_text">Question:</label>
+                            <textarea class="form-control" id="question_text" name="question_text" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="question_type">Question Type:</label>
+                            <select class="form-control" id="question_type" name="question_type">
+                                <option value="multiple_choice">Multiple Choice</option>
+                                <option value="true_false">True/False</option>
+                            </select>
+                        </div>
+                        
+                        <div id="options-container">
+                            <label>Options:</label>
+                            <div class="option-group mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" name="correct_option" value="0" required>
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" name="option_text[]" placeholder="Option 1" required>
+                                </div>
+                            </div>
+                            
+                            <div class="option-group mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" name="correct_option" value="1">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" name="option_text[]" placeholder="Option 2" required>
+                                </div>
+                            </div>
+                            
+                            <div class="option-group mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" name="correct_option" value="2">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" name="option_text[]" placeholder="Option 3">
+                                </div>
+                            </div>
+                            
+                            <div class="option-group mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" name="correct_option" value="3">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" name="option_text[]" placeholder="Option 4">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Add Question</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Existing Questions -->
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="mb-0">Existing Questions</h3>
+                </div>
+                <div class="card-body">
+                    {% if questions %}
+                    <div class="accordion" id="questionsAccordion">
+                        {% for question in questions %}
+                        <div class="card mb-2">
+                            <div class="card-header" id="heading{{ question.id }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{ question.id }}" aria-expanded="false" aria-controls="collapse{{ question.id }}">
+                                        Q{{ loop.index }}: {{ question.text|truncate(50) }}
+                                    </button>
+                                </h2>
+                            </div>
+                            
+                            <div id="collapse{{ question.id }}" class="collapse" aria-labelledby="heading{{ question.id }}" data-parent="#questionsAccordion">
+                                <div class="card-body">
+                                    <p><strong>Question:</strong> {{ question.text }}</p>
+                                    <p><strong>Type:</strong> {{ question.question_type }}</p>
+                                    
+                                    <div class="options-list mt-3">
+                                        <p><strong>Options:</strong></p>
+                                        <ul class="list-group">
+                                            {% for option in question.options %}
+                                            <li class="list-group-item {% if option.is_correct %}list-group-item-success{% endif %}">
+                                                {{ option.option_text }}
+                                                {% if option.is_correct %}
+                                                <span class="badge badge-success float-right">Correct</span>
+                                                {% endif %}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p>No questions have been added to this test yet. Add your first question using the form above.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('aptitude.aptitude_home') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Tests
+        </a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const questionTypeSelect = document.getElementById('question_type');
+        const optionsContainer = document.getElementById('options-container');
+        
+        questionTypeSelect.addEventListener('change', function() {
+            if (this.value === 'true_false') {
+                // Set up true/false options
+                optionsContainer.innerHTML = `
+                    <label>Options:</label>
+                    <div class="option-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="radio" name="correct_option" value="0" required>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" name="option_text[]" value="True" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="radio" name="correct_option" value="1">
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" name="option_text[]" value="False" readonly>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Set up multiple choice options
+                optionsContainer.innerHTML = `
+                    <label>Options:</label>
+                    <div class="option-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="radio" name="correct_option" value="0" required>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" name="option_text[]" placeholder="Option 1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="radio" name="correct_option" value="1">
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" name="option_text[]" placeholder="Option 2" required>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="radio" name="correct_option" value="2">
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" name="option_text[]" placeholder="Option 3">
+                        </div>
+                    </div>
+                    
+                    <div class="option-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="radio" name="correct_option" value="3">
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" name="option_text[]" placeholder="Option 4">
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    });
+</script>
+{% endblock %} 
